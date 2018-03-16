@@ -40,11 +40,11 @@ public class FusedLocationService extends Service implements GoogleApiClient.Con
     private float accX, accY, accZ;
     private boolean dataSent = false;
     private Location location;
-    private ShakeListener shakeListener;
+    //private ShakeListener shakeListener;
 
     private LocalBroadcastManager localBroadcastManager;
     private BroadcastReceiver broadcastReceiver;
-    private boolean accidentHappened;
+    //private boolean accidentHappened;
 
 
     @Override
@@ -56,7 +56,7 @@ public class FusedLocationService extends Service implements GoogleApiClient.Con
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        shakeListener = new ShakeListener(this);
+        //shakeListener = new ShakeListener(this);
         //shakeListener.setOnAccChangeListener(this);
         latestLocCallDone = false;
         dataSent = false;
@@ -68,14 +68,14 @@ public class FusedLocationService extends Service implements GoogleApiClient.Con
         accY = 0;
         accX = 0;
         accZ = 0;
-        accidentHappened = intent.hasExtra(SensorConstants.X_ACCELERATION);
-        if (accidentHappened) {
+        //accidentHappened = intent.hasExtra(SensorConstants.X_ACCELERATION);
+        /*if (accidentHappened) {
             accX = intent.getFloatExtra(SensorConstants.X_ACCELERATION, 0);
             accY = intent.getFloatExtra(SensorConstants.Y_ACCELERATION, 0);
             accZ = intent.getFloatExtra(SensorConstants.Z_ACCELERATION, 0);
             shakeListener.setOnAccChangeListener(null);
-
-        }
+*/
+       // }
         return Service.START_NOT_STICKY;
     }
 
@@ -93,8 +93,8 @@ public class FusedLocationService extends Service implements GoogleApiClient.Con
         accY = 0;
         accX = 0;
         accZ = 0;
-        shakeListener = null;
-        accidentHappened = false;
+      /*  shakeListener = null;
+        accidentHappened = false;*/
 
     }
 
@@ -167,9 +167,9 @@ public class FusedLocationService extends Service implements GoogleApiClient.Con
                 mGoogleApiClient.connect();
             }
             this.location = location;
-            if (accZ != 0 || accX != 0 || accY != 0) {
-                sendResult(location);
-            }
+            //if (accZ != 0 || accX != 0 || accY != 0) {
+            sendResult(location);
+          //  }
 
         }
     }
@@ -189,20 +189,20 @@ public class FusedLocationService extends Service implements GoogleApiClient.Con
         jsonObject.addProperty("gps_id", Utils.getDeviceId(this));
         jsonObject.addProperty("accelerometer_id", Utils.getDeviceId(this));
         jsonObject.addProperty("accelerometer_id", Utils.getDeviceId(this));
-        jsonObject.addProperty("x_acc", accX);
+        /*jsonObject.addProperty("x_acc", accX);
         jsonObject.addProperty("y_acc", accY);
-        jsonObject.addProperty("z_acc", accZ);
+        jsonObject.addProperty("z_acc", accZ);*/
         if(location != null) {
             jsonObject.addProperty("latitude", location.getLatitude());
             jsonObject.addProperty("longitude", location.getLongitude());
         }
         jsonObject.addProperty("date", System.currentTimeMillis());
-        Call call;
-        if (accidentHappened) {
+        Call call = retrofitApis.sendGPS(jsonObject);;
+        /*if (accidentHappened) {
             call = retrofitApis.sendAccidentData(jsonObject);
         } else {
             call = retrofitApis.sendSensorData(jsonObject);
-        }
+        }*/
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {

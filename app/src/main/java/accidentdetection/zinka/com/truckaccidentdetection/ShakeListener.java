@@ -1,9 +1,10 @@
 package accidentdetection.zinka.com.truckaccidentdetection;
 
 import android.content.Context;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 public class ShakeListener implements SensorListener
 {
@@ -23,7 +24,12 @@ public class ShakeListener implements SensorListener
     private long mLastShake;
     private long mLastForce;
 
+    private long accidentThreshold;
+    private long harshBrakeThreshold;
+    private long harshAccThreshHold;
+
     private AccelerationChangeListener accelerationChangeListener;
+    private SharedPreferences sharedPreferences;
 
     public interface OnShakeListener
     {
@@ -33,6 +39,11 @@ public class ShakeListener implements SensorListener
     public ShakeListener(Context context)
     {
         mContext = context;
+        sharedPreferences = context.getSharedPreferences(StorageConstants.CONFIG_PREFS,Context.MODE_PRIVATE);
+        harshAccThreshHold = sharedPreferences.getLong(StorageConstants.HARD_ACC_THRESHOLD,15);
+        harshBrakeThreshold = sharedPreferences.getLong(StorageConstants.HARSH_BRAKE_THRESHOLD,-15);
+        accidentThreshold = sharedPreferences.getLong(StorageConstants.ACCIDENT_THRESHOLD,-19);
+
         resume();
     }
 
@@ -71,6 +82,12 @@ public class ShakeListener implements SensorListener
     {
         if (sensor != SensorManager.SENSOR_ACCELEROMETER) return;
         long now = System.currentTimeMillis();
+
+        Log.d("AccThreshHolds",StorageConstants.ACCIDENT_THRESHOLD + " " + accidentThreshold);
+        Log.d("AccThreshHolds",StorageConstants.HARD_ACC_THRESHOLD + " " + harshAccThreshHold);
+        Log.d("AccThreshHolds",StorageConstants.HARSH_BRAKE_THRESHOLD + " " + harshBrakeThreshold);
+
+
 /*
         if(accelerationChangeListener != null) {
             accelerationChangeListener.onAccelChange(values[SensorManager.DATA_X], values[SensorManager.DATA_Y],
@@ -92,15 +109,15 @@ public class ShakeListener implements SensorListener
 
 
             float speed = Math.abs(values[SensorManager.DATA_X] + values[SensorManager.DATA_Y] + values[SensorManager.DATA_Z] - mLastX - mLastY - mLastZ) / diff * 10000;
-            if (netDiff > FORCE_THRESHOLD ) {
+            if (netDiff > harshAccThreshHold ) {
                 //if ((++mShakeCount >= SHAKE_COUNT) && (now - mLastShake > SHAKE_DURATION)) {
                     mLastShake = now;
                     mShakeCount = 0;
                     if (mShakeListener != null) {
-                        Intent intent = new Intent(mContext,FusedLocationService.class);
+                        /*Intent intent = new Intent(mContext,FusedLocationService.class);
                         intent.putExtra(SensorConstants.X_ACCELERATION, values[SensorManager.DATA_X]);
                         intent.putExtra(SensorConstants.Y_ACCELERATION, values[SensorManager.DATA_Y]);
-                        intent.putExtra(SensorConstants.Z_ACCELERATION, values[SensorManager.DATA_Z]);
+                        intent.putExtra(SensorConstants.Z_ACCELERATION, values[SensorManager.DATA_Z]);*/
                         accelerationChangeListener.onAccelChange(values[SensorManager.DATA_X], values[SensorManager.DATA_Y],
                                 values[SensorManager.DATA_Z], "High Acc");
                         //mContext.startService(intent);
@@ -111,9 +128,15 @@ public class ShakeListener implements SensorListener
                 mLastForce = now;
             }
 
-            else if(netDiff < (-FORCE_THRESHOLD)) {
+            else if(netDiff > (accidentThreshold) && netDiff < harshBrakeThreshold) {
                 accelerationChangeListener.onAccelChange(values[SensorManager.DATA_X], values[SensorManager.DATA_Y],
                         values[SensorManager.DATA_Z], "low Acc");
+                mShakeListener.onShake();
+            }
+
+            else if(netDiff < accidentThreshold) {
+                accelerationChangeListener.onAccelChange(values[SensorManager.DATA_X], values[SensorManager.DATA_Y],
+                        values[SensorManager.DATA_Z], "accident");
                 mShakeListener.onShake();
             }
 
