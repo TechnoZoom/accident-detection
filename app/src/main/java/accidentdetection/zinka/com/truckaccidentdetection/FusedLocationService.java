@@ -25,7 +25,7 @@ import retrofit2.Response;
 
 
 public class FusedLocationService extends Service implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener /*SensorListener*/, ShakeListener.AccelerationChangeListener {
+        GoogleApiClient.OnConnectionFailedListener, LocationListener /*SensorListener*/ /*ShakeListener.AccelerationChangeListener*/ {
 
     private boolean latestLocCallDone;
     private GoogleApiClient mGoogleApiClient;
@@ -57,7 +57,7 @@ public class FusedLocationService extends Service implements GoogleApiClient.Con
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         shakeListener = new ShakeListener(this);
-        shakeListener.setOnAccChangeListener(this);
+        //shakeListener.setOnAccChangeListener(this);
         latestLocCallDone = false;
         dataSent = false;
         Log.d("locTesting", "--------------------");
@@ -192,8 +192,10 @@ public class FusedLocationService extends Service implements GoogleApiClient.Con
         jsonObject.addProperty("x_acc", accX);
         jsonObject.addProperty("y_acc", accY);
         jsonObject.addProperty("z_acc", accZ);
-        jsonObject.addProperty("latitude", location.getLatitude());
-        jsonObject.addProperty("longitude", location.getLongitude());
+        if(location != null) {
+            jsonObject.addProperty("latitude", location.getLatitude());
+            jsonObject.addProperty("longitude", location.getLongitude());
+        }
         jsonObject.addProperty("date", System.currentTimeMillis());
         Call call;
         if (accidentHappened) {
@@ -244,15 +246,15 @@ public class FusedLocationService extends Service implements GoogleApiClient.Con
     }*/
 
 
-    @Override
+   /* @Override
     public void onAccelChange(float accX, float accY, float accZ) {
         // Log.d("locTesting", "onAccelChange");
         this.accX = accX;
         this.accY = accY;
         this.accZ = accZ;
-        if (location != null) {
+        //if (location != null) {
             //Log.d("locTesting", "onAccelChangeLocNotNull");
-            sendResult(location);
-        }
-    }
+        sendResult(location);
+        //}
+    }*/
 }

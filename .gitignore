@@ -1,8 +1,14 @@
-<<<<<<< HEAD
-# Created by .ignore support plugin (hsz.mobi)
-### Android template
-=======
->>>>>>> a08c8081d8f49b5e65a928410761ec8eda1801f1
+`*.iml
+.idea
+.gradle
+/local.properties
+.DS_Store
+build/
+/captures
+.externalNativeBuild
+app/build
+build
+
 # Built application files
 *.apk
 *.ap_
@@ -20,7 +26,6 @@ out/
 
 # Gradle files
 .gradle/
-build/
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -38,7 +43,6 @@ proguard/
 captures/
 
 # Intellij
-*.iml
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/gradle.xml
@@ -49,7 +53,6 @@ captures/
 *.jks
 
 # External native build folder generated in Android Studio 2.2 and later
-.externalNativeBuild
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
@@ -58,4 +61,3 @@ google-services.json
 freeline.py
 freeline/
 freeline_project_description.json
-

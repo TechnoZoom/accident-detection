@@ -7,11 +7,12 @@ import android.hardware.SensorManager;
 
 public class ShakeListener implements SensorListener
 {
-    private static final int FORCE_THRESHOLD = 10;
+    private static final double FORCE_THRESHOLD = 15;
     private static final int TIME_THRESHOLD = 75;
     private static final int SHAKE_TIMEOUT = 500;
     private static final int SHAKE_DURATION = 150;
     private static final int SHAKE_COUNT = 1;
+
 
     private SensorManager mSensorMgr;
     private float mLastX=-1.0f, mLastY=-1.0f, mLastZ=-1.0f;
@@ -70,11 +71,11 @@ public class ShakeListener implements SensorListener
     {
         if (sensor != SensorManager.SENSOR_ACCELEROMETER) return;
         long now = System.currentTimeMillis();
-
+/*
         if(accelerationChangeListener != null) {
             accelerationChangeListener.onAccelChange(values[SensorManager.DATA_X], values[SensorManager.DATA_Y],
                     values[SensorManager.DATA_Z]);
-        }
+        }*/
 
         if ((now - mLastForce) > SHAKE_TIMEOUT) {
             mShakeCount = 0;
@@ -82,11 +83,17 @@ public class ShakeListener implements SensorListener
 
         if ((now - mLastTime) > TIME_THRESHOLD) {
             long diff = now - mLastTime;
+            double oldNetAcc = Math.sqrt(Math.pow(Math.abs(mLastX),2) + Math.pow(Math.abs(mLastZ),2));
+            double newAcc =  Math.sqrt(Math.pow(values[SensorManager.DATA_X], 2)  + Math.pow(values[SensorManager.DATA_Z],2));
+            double netDiff = newAcc - oldNetAcc;
             float xDiff = values[SensorManager.DATA_X] - mLastX;
             //Log.d("XAcccDiff", String.valueOf(values[SensorManager.DATA_X] - mLastX));
+
+
+
             float speed = Math.abs(values[SensorManager.DATA_X] + values[SensorManager.DATA_Y] + values[SensorManager.DATA_Z] - mLastX - mLastY - mLastZ) / diff * 10000;
-            if (xDiff > FORCE_THRESHOLD) {
-                if ((++mShakeCount >= SHAKE_COUNT) && (now - mLastShake > SHAKE_DURATION)) {
+            if (netDiff > FORCE_THRESHOLD ) {
+                //if ((++mShakeCount >= SHAKE_COUNT) && (now - mLastShake > SHAKE_DURATION)) {
                     mLastShake = now;
                     mShakeCount = 0;
                     if (mShakeListener != null) {
@@ -94,12 +101,26 @@ public class ShakeListener implements SensorListener
                         intent.putExtra(SensorConstants.X_ACCELERATION, values[SensorManager.DATA_X]);
                         intent.putExtra(SensorConstants.Y_ACCELERATION, values[SensorManager.DATA_Y]);
                         intent.putExtra(SensorConstants.Z_ACCELERATION, values[SensorManager.DATA_Z]);
-                        mContext.startService(intent);
+                        accelerationChangeListener.onAccelChange(values[SensorManager.DATA_X], values[SensorManager.DATA_Y],
+                                values[SensorManager.DATA_Z], "High Acc");
+                        //mContext.startService(intent);
                         //playSound();
                         mShakeListener.onShake();
                     }
-                }
+               // }
                 mLastForce = now;
+            }
+
+            else if(netDiff < (-FORCE_THRESHOLD)) {
+                accelerationChangeListener.onAccelChange(values[SensorManager.DATA_X], values[SensorManager.DATA_Y],
+                        values[SensorManager.DATA_Z], "low Acc");
+                mShakeListener.onShake();
+            }
+
+            else {
+
+                accelerationChangeListener.onAccelChange(values[SensorManager.DATA_X], values[SensorManager.DATA_Y],
+                        values[SensorManager.DATA_Z], null);
             }
             mLastTime = now;
             mLastX = values[SensorManager.DATA_X];
@@ -109,7 +130,7 @@ public class ShakeListener implements SensorListener
     }
 
     public interface AccelerationChangeListener {
-        void onAccelChange(float accX, float accY, float accZ);
+        void onAccelChange(float accX, float accY, float accZ, String type);
     }
 
 

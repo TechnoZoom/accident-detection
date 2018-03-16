@@ -16,7 +16,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //sendSensorDataInforeground();
-        scheduleSensorDataSendingAlarm();
+        //scheduleSensorDataSendingAlarm();
         startService(new Intent(getApplicationContext(), ShakeService.class));
     }
 

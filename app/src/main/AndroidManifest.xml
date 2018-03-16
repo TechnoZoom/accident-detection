@@ -17,14 +17,11 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-'
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <receiver android:name=".SyncingReceiver" />
-
-
         <service android:enabled="true"
             android:name="accidentdetection.zinka.com.truckaccidentdetection.ShakeService"/>
 
